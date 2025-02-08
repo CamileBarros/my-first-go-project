@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"fmt"
@@ -9,14 +9,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func main() {
+func handler() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080" // Porta padrão se não especificada
 	}
 
 	r := mux.NewRouter()
-	r.HandleFunc("/my-first-go-project.vercel.app", HomeHandler).Methods("GET")
+	r.HandleFunc("/my-first-go-project", HomeHandler).Methods("GET")
 	http.Handle("/", r)
 	fmt.Printf("Servidor rodando na porta %s\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

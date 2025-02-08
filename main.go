@@ -16,7 +16,7 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.HandleFunc("/my-first-go-project", HomeHandler).Methods("GET")
+	r.HandleFunc("/my-first-go-project.vercel.app", HomeHandler).Methods("GET")
 	http.Handle("/", r)
 	fmt.Printf("Servidor rodando na porta %s\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

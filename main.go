@@ -1,41 +1,43 @@
-package handler
+package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 )
 
-func handler() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080" // Porta padrão se não especificada
-	}
-
-	r := mux.NewRouter()
-	r.HandleFunc("/", HomeHandler).Methods("GET")
-	http.Handle("/", r)
-	fmt.Printf("Servidor rodando na porta %s\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+type FavoriteSongs struct {
+	ID     int    `json:"id"`
+	Name   string `json:"name"`
+	Artist string `json:"artist"`
+	Album  string `json:"album"`
+	Year   string `json:"year"`
+	Rate   int    `json:"rate"`
 }
 
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello world!"))
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("Autorização necessária"))
-		return
-	}
+var favoriteSongs = []FavoriteSongs{}
 
-	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
-		w.Write([]byte("Tipo de autorização: Bearer Token"))
-	} else if len(authHeader) > 5 && authHeader[:5] == "Basic" {
-		w.Write([]byte("Tipo de autorização: Basic Auth"))
-	} else {
-		w.Write([]byte("Tipo de autorização desconhecido"))
-	}
+func main() {
+	r := mux.NewRouter()
+	r.HandleFunc("/", GetFavoriteSongs).Methods("GET")
+	r.HandleFunc("/", CreateFavoriteSongs).Methods("POST")
+	http.Handle("/", r)
+	fmt.Println("Servidor rodando na porta 8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func GetFavoriteSongs(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(favoriteSongs)
+}
+
+func CreateFavoriteSongs(w http.ResponseWriter, r *http.Request) {
+	var song FavoriteSongs
+	_ = json.NewDecoder(r.Body).Decode(&song)
+	favoriteSongs = append(favoriteSongs, song)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(favoriteSongs)
 }
